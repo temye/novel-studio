@@ -108,7 +108,9 @@ type Store struct {
 
 var authMu sync.RWMutex
 var users = map[string]string{"author@example.com": "password"}
-var authSecret = []byte("novel-studio-development-secret")
+var authSecret []byte
+
+const tokenTTL = 24 * time.Hour
 
 type aiRequest struct {
 	Model       string              `json:"model"`
@@ -125,6 +127,15 @@ type aiResponse struct {
 
 func main() {
 	loadDotEnv()
+	secret := strings.TrimSpace(os.Getenv("AUTH_SECRET"))
+	if secret == "" || strings.HasPrefix(secret, "replace-with-") {
+		if os.Getenv("APP_ENV") == "production" {
+			log.Fatal("AUTH_SECRET must be configured in production")
+		}
+		secret = "novel-studio-development-secret"
+		log.Print("warning: using development auth secret; set AUTH_SECRET before deployment")
+	}
+	authSecret = []byte(secret)
 	store := &Store{nextProject: 1, nextChapter: 1, nextWorld: 1, nextCharacter: 1, nextLocation: 1, nextItem: 1, nextTask: 1, nextVersion: 1}
 	storeDataPath = envOr("NOVEL_DATA_FILE", filepath.Join("data", "novel-studio.json"))
 	if err := store.load(); err != nil {
@@ -150,7 +161,7 @@ func main() {
 	if port == "" {
 		port = "9008"
 	}
-	server := &http.Server{Addr: ":" + port, Handler: cors(logging(authMiddleware(persistAfterMutation(store, mux))))}
+	server := &http.Server{Addr: ":" + port, Handler: cors(securityHeaders(limitedBody(logging(authMiddleware(persistAfterMutation(store, mux))))))}
 	log.Printf("Novel Studio listening on http://localhost:%s", port)
 	log.Fatal(server.ListenAndServe())
 }
@@ -221,7 +232,8 @@ func register(w http.ResponseWriter, r *http.Request) {
 }
 
 func issueToken(account string) string {
-	raw := base64.RawURLEncoding.EncodeToString([]byte(account))
+	expires := time.Now().Add(tokenTTL).Unix()
+	raw := base64.RawURLEncoding.EncodeToString([]byte(fmt.Sprintf("%s|%d", account, expires)))
 	h := hmac.New(sha256.New, authSecret)
 	h.Write([]byte(raw))
 	return raw + "." + base64.RawURLEncoding.EncodeToString(h.Sum(nil))
@@ -242,13 +254,25 @@ func authMiddleware(next http.Handler) http.Handler {
 }
 func validToken(token string) bool {
 	parts := strings.Split(token, ".")
-	if len(parts) != 2 {
+	if len(parts) != 2 || len(authSecret) == 0 {
 		return false
 	}
 	h := hmac.New(sha256.New, authSecret)
 	h.Write([]byte(parts[0]))
 	sig, err := base64.RawURLEncoding.DecodeString(parts[1])
-	return err == nil && hmac.Equal(sig, h.Sum(nil))
+	if err != nil || !hmac.Equal(sig, h.Sum(nil)) {
+		return false
+	}
+	payload, err := base64.RawURLEncoding.DecodeString(parts[0])
+	if err != nil {
+		return false
+	}
+	fields := strings.Split(string(payload), "|")
+	if len(fields) != 2 || fields[0] == "" {
+		return false
+	}
+	expires, err := strconv.ParseInt(fields[1], 10, 64)
+	return err == nil && time.Now().Unix() < expires
 }
 
 func (s *Store) projectsHandler(w http.ResponseWriter, r *http.Request) {
@@ -1344,6 +1368,27 @@ func frontendHandler() http.Handler {
 	}
 	return http.FileServer(http.Dir(path))
 }
+func securityHeaders(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("X-Frame-Options", "DENY")
+		w.Header().Set("Referrer-Policy", "same-origin")
+		if strings.HasPrefix(r.URL.Path, "/api/") {
+			w.Header().Set("Cache-Control", "no-store")
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func limitedBody(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Body != nil && r.Method != http.MethodGet {
+			r.Body = http.MaxBytesReader(w, r.Body, 2<<20)
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 func logging(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("%s %s", r.Method, r.URL.Path)

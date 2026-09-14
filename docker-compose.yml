@@ -1,0 +1,17 @@
+services:
+  app:
+    build: .
+    ports:
+      - "9008:9008"
+    environment:
+      PORT: "9008"
+      APP_ENV: "production"
+      AI_PROVIDER: ${AI_PROVIDER:-openai-compatible}
+      AI_BASE_URL: ${AI_BASE_URL:-}
+      AI_API_KEY: ${AI_API_KEY:-}
+      AI_MODEL: ${AI_MODEL:-gpt-4o-mini}
+      NOVEL_DB_PATH: /app/data/novel-studio.db
+      AUTH_SECRET: ${AUTH_SECRET:?set-a-random-auth-secret}
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped

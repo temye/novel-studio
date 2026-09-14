@@ -1,0 +1,124 @@
+{
+  "projects": [
+    {
+      "id": 1,
+      "title": "未命名的星港",
+      "summary": "一座漂浮在深空中的城市，正在等待它的第一段故事。",
+      "genre": "科幻",
+      "target_words": 100000,
+      "current_words": 12480,
+      "status": "writing",
+      "created_at": "2026-09-05T15:03:54.5511988+08:00",
+      "updated_at": "2026-09-08T15:03:54.5511988+08:00"
+    }
+  ],
+  "chapters": [
+    {
+      "id": 1,
+      "project_id": 1,
+      "number": 1,
+      "title": "抵达星港",
+      "outline": "这一章需要建立场景，并让主角面对一个无法回避的选择。",
+      "content": "",
+      "word_count": 3577,
+      "status": "done",
+      "updated_at": "2026-09-08T15:03:54.5511988+08:00"
+    },
+    {
+      "id": 2,
+      "project_id": 1,
+      "number": 2,
+      "title": "没有名字的信",
+      "outline": "这一章需要建立场景，并让主角面对一个无法回避的选择。",
+      "content": "",
+      "word_count": 2913,
+      "status": "done",
+      "updated_at": "2026-09-08T15:03:54.5511988+08:00"
+    },
+    {
+      "id": 3,
+      "project_id": 1,
+      "number": 3,
+      "title": "潮汐引擎",
+      "outline": "这一章需要建立场景，并让主角面对一个无法回避的选择。",
+      "content": "",
+      "word_count": 0,
+      "status": "outline",
+      "updated_at": "2026-09-08T15:03:54.5511988+08:00"
+    }
+  ],
+  "world": [
+    {
+      "id": 1,
+      "project_id": 1,
+      "category": "核心设定",
+      "name": "星港公约",
+      "description": "所有抵达星港的船只必须交出一段记忆作为通行凭证。",
+      "updated_at": "2026-09-08T15:03:54.5511988+08:00"
+    }
+  ],
+  "characters": [
+    {
+      "id": 1,
+      "project_id": 1,
+      "name": "林澈",
+      "role": "主角",
+      "personality": "谨慎、敏锐，不轻易相信承诺。",
+      "goal": "找回被星港扣留的记忆。",
+      "updated_at": "2026-09-08T15:03:54.5511988+08:00"
+    }
+  ],
+  "locations": [
+    {
+      "id": 1,
+      "project_id": 1,
+      "name": "第七码头",
+      "description": "星港最外侧的旧式泊位，常年笼罩在蓝色雾气中。",
+      "updated_at": "2026-09-08T15:03:54.5511988+08:00"
+    }
+  ],
+  "items": [
+    {
+      "id": 1,
+      "project_id": 1,
+      "name": "潮汐引擎",
+      "description": "能够改变局部时间流速的未知装置。",
+      "updated_at": "2026-09-08T15:03:54.5511988+08:00"
+    }
+  ],
+  "tasks": [
+    {
+      "id": 1,
+      "project_id": 1,
+      "chapter_id": 1,
+      "type": "generate",
+      "status": "completed",
+      "progress": 100,
+      "result": "雾气沿着第七码头的舷窗缓慢退去。林澈抬起手腕，潮汐引擎在沉默中亮起，像一颗迟到的星。",
+      "created_at": "2026-09-08T16:11:37.7669708+08:00",
+      "completed_at": "2026-09-08T16:11:38.668924+08:00"
+    },
+    {
+      "id": 2,
+      "project_id": 1,
+      "chapter_id": 1,
+      "type": "continue",
+      "status": "completed",
+      "progress": 100,
+      "result": "雾气沿着第七码头的舷窗缓慢退去。林澈抬起手腕，潮汐引擎在沉默中亮起，像一颗迟到的星。",
+      "created_at": "2026-09-08T16:11:51.4619728+08:00",
+      "completed_at": "2026-09-08T16:11:52.3651324+08:00"
+    }
+  ],
+  "versions": null,
+  "next": [
+    2,
+    4,
+    2,
+    2,
+    2,
+    2,
+    3,
+    1
+  ]
+}

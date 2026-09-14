@@ -1231,7 +1231,7 @@ func (s *Store) generateWithProvider(kind string, projectID, chapterID int) stri
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return result
 	}
-	data, err := io.ReadAll(resp.Body)
+	data, err := io.ReadAll(io.LimitReader(resp.Body, 4<<20))
 	if err != nil {
 		return result
 	}
